@@ -1,0 +1,132 @@
+.wrapper {
+  width: 100vw;
+  height: 100vh;
+  background-color: aqua;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  .player-0 {
+    position: absolute;
+    height: 248px;
+    width: 100%;
+    bottom: 0;
+    display: flex;
+    flex-wrap: nowrap;
+
+    .wrapper-cards {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+    }
+
+    .infor {
+      position: absolute;
+      right: 24%;
+      bottom: 0;
+      float: right;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .player-1 {
+    position: absolute;
+    right: 0;
+    height: 100%;
+    display: flex;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 200px;
+
+    .infor {
+      position: absolute;
+      top: 25%;
+      right: 0;
+    }
+  }
+
+  .player-2 {
+    position: absolute;
+    top: 0;
+    height: 248px;
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+
+    .wrapper-cards {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+    }
+
+    .infor {
+      position: absolute;
+      left: 22%;
+      top: 0;
+      float: right;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .player-3 {
+    position: absolute;
+    left: 0;
+    height: 100%;
+    display: flex;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 200px;
+
+    .infor {
+      position: absolute;
+      bottom: 25%;
+      left: 0;
+    }
+  }
+
+  .wrapper-infor-deck {
+    text-align: center;
+
+    button {
+      color: white;
+      padding: 8px 12px;
+      border-radius: 10px;
+      margin: 0 16px;
+      border: 3px solid #fff;
+      font-size: large;
+      cursor: pointer;
+    }
+
+    .deck-cards-remaining {
+      font-size: larger;
+      padding: 16px 0;
+    }
+
+    .shuffle-btn {
+      background-color: #007f00;
+    }
+
+    .drawn-btn {
+      background-color: #ffbf18;
+    }
+
+    .reveal-btn {
+      background-color: #272727;
+    }
+
+    .reset-btn {
+      background-color: #6e3701;
+    }
+  }
+}
