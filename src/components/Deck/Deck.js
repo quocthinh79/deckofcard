@@ -70,6 +70,7 @@ function Deck() {
   }, []);
 
   const handleDrawnClick = async (deckId) => {
+    setWinner([]);
     setDisableButton(false);
     const listPlayerChecked = playerListState.filter(
       (item) => item.coins >= 900
@@ -126,6 +127,7 @@ function Deck() {
 
   const handleRevealClick = () => {
     setDisableButton(true);
+    setWinner([]);
     let maxValue = 0;
     playerListState.forEach((item, index) => {
       const score = item.cards.reduce(function (total, itemS) {
@@ -146,27 +148,23 @@ function Deck() {
       ]);
       if (score % 10 > maxValue % 10) {
         maxValue = score;
-        // setWinner(item);
-        setContentPopup(item.name);
         setWinner([item.name]);
-        // if (score % 10 === maxValue % 10) {
-        //   setWinner((pre) => ({ ...pre, item }));
-        // }
       }
       if (score % 10 === maxValue % 10) {
-        setWinner((pre) => [...pre, item.name]);
-        // setWinner((pre) => [
-        //   ...pre.slice(0, index),
-        //   { ...item, point: score },
-        //   ...pre.slice(index + 1),
-        // ]);
+        setWinner((pre) =>
+          !pre.includes(item.name) ? [...pre, item.name] : [item.name]
+        );
       }
       setScoreState(maxValue);
       setCheckCard(true);
     });
-    setClosePopup(false);
-    setTitlePopup("Winner");
   };
+
+  useEffect(() => {
+    setTitlePopup("Winner");
+    setContentPopup(winner.toString());
+    winner.length > 0 ? setClosePopup(false) : setClosePopup(true);
+  }, [winner]);
 
   const subtrac = () => {
     !finish &&
@@ -259,7 +257,6 @@ function Deck() {
         </div>
       ))}
       <div className="wrapper-infor-deck">
-        <div>{console.log(winner)}</div>
         <div className="deck-cards-remaining">Deck cards: {remaining}</div>
         <div>
           <Button className={`shuffle-btn`} func={handleShuffleClick}>
