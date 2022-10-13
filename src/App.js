@@ -1,4 +1,5 @@
-import Deck from "./Deck";
+import Deck from "./components/Deck/Deck";
+
 
 export default function App() {
   return (

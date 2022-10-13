@@ -1,41 +1,14 @@
 import { useEffect, useState } from "react";
-import { drawACard, shuffleTheCards } from "./untils/request";
+import { drawACard, shuffleTheCards } from "../../untils/request";
 import styles from "./Deck.scss";
 import classNames from "classnames/bind";
-import Card from "./components/Card";
-import Popup from "./components/Popup";
+import Card from "../Card";
+import Popup from "../Popup";
+import Button from "../Button";
 
 const cx = classNames.bind(styles);
 
 function Deck() {
-  //   const [userA, setUserA] = useState({
-  //   id: 0,
-  //   name: "You",
-  //   coins: 5000,
-  //   cards: [],
-  //   point: 0,
-  // });
-  // const [userB, setUserB] = useState({
-  //   id: 1,
-  //   name: "User B",
-  //   coins: 5000,
-  //   cards: [],
-  //   point: 0,
-  // });
-  // const [userC, setUserC] = useState({
-  //   id: 2,
-  //   name: "User C",
-  //   coins: 5000,
-  //   cards: [],
-  //   point: 0,
-  // });
-  // const [userD, setUserD] = useState({
-  //   id: 3,
-  //   name: "User D",
-  //   coins: 5000,
-  //   cards: [],
-  //   point: 0,
-  // });
   const userA = {
     id: 0,
     name: "You",
@@ -96,9 +69,6 @@ function Deck() {
   }, []);
 
   const handleDrawnClick = async (deckId) => {
-    // Reset
-    // setPlayerListState([]);
-    // playerList = [...playerListState];
     const listPlayerChecked = playerListState.filter(
       (item) => item.coins >= 900
     );
@@ -133,20 +103,10 @@ function Deck() {
             setTitlePopup("Error");
             setContentPopup("Not enough cards from the deck");
             setClosePopup(false);
-            // console.log(res);
             break;
           }
         }
-
-        // if (listPlayerChecked.length > 2) {
-        //   setPlayerListState((pre) => [
-        //     ...pre.slice(0, i),
-        //     { ...listPlayerChecked[i], point: 0 },
-        //     ...pre.slice(i + 1),
-        //   ]);
-        // } else {
         setPlayerListState(listPlayerChecked);
-        // }
       }
     }
   };
@@ -188,7 +148,6 @@ function Deck() {
   const subtrac = () => {
     !finish &&
       playerListState.map((item, index) => {
-        console.log(item.point);
         if (item.point % 10 !== scoreState % 10) {
           setPlayerListState((pre) => [
             ...pre.slice(0, index),
@@ -207,16 +166,29 @@ function Deck() {
     });
     setDeckId(resShuffleTheCards.deck_id);
     setRemaining(resShuffleTheCards.remaining);
+    playerListState.map((item, index) => {
+      setPlayerListState((pre) => [
+        ...pre.slice(0, index),
+        { ...item, cards: [] },
+        ...pre.slice(index + 1),
+      ]);
+    });
   };
 
-  const handleResetClick = () => {
+  const handleResetClick = async () => {
     setPlayerListState([
       { ...userA },
       { ...userB },
       { ...userC },
       { ...userD },
     ]);
-    handleShuffleClick();
+    const resShuffleTheCards = await shuffleTheCards({
+      params: {
+        deck_count: 1,
+      },
+    });
+    setDeckId(resShuffleTheCards.deck_id);
+    setRemaining(resShuffleTheCards.remaining);
     setFinish(false);
   };
 
@@ -242,11 +214,7 @@ function Deck() {
           <div className="wrapper-cards">
             {item.cards.map((item, indexCard) =>
               !checkCard ? (
-                indexPlayer !== 0 ? (
-                  <Card key={indexCard} />
-                ) : (
-                  <Card key={indexCard} urlImage={item.image} />
-                )
+                <Card key={indexCard} />
               ) : (
                 <Card key={indexCard} urlImage={item.image} />
               )
@@ -267,21 +235,26 @@ function Deck() {
       <div className="wrapper-infor-deck">
         <div className="deck-cards-remaining">Deck cards: {remaining}</div>
         <div>
-          <button className="shuffle-btn" onClick={() => handleShuffleClick()}>
+          <Button className={`shuffle-btn`} func={handleShuffleClick}>
             Shuffle
-          </button>
-          <button
-            className="drawn-btn"
-            onClick={() => handleDrawnClick(deckId)}
+          </Button>
+          <Button
+            className={`drawn-btn`}
+            func={() => handleDrawnClick(deckId)}
+            deckId={deckId}
           >
             Drawn
-          </button>
-          <button className="reveal-btn" onClick={() => handleRevealClick()}>
+          </Button>
+          <Button
+            className={`reveal-btn`}
+            disabled={playerListState[0].cards.length > 0 ? false : true}
+            func={handleRevealClick}
+          >
             Reveal
-          </button>
-          <button className="reset-btn" onClick={handleResetClick}>
+          </Button>
+          <Button className={`reset-btn`} func={handleResetClick}>
             Reset
-          </button>
+          </Button>
         </div>
       </div>
     </div>
