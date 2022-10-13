@@ -55,6 +55,7 @@ function Deck() {
   const [calcRemaining, setCalcRemaining] = useState(
     52 % (playerListState.length * 3)
   );
+  const [disableButton, setDisableButton] = useState(false);
 
   useEffect(() => {
     const callApi = async () => {
@@ -69,6 +70,7 @@ function Deck() {
   }, []);
 
   const handleDrawnClick = async (deckId) => {
+    setDisableButton(false);
     const listPlayerChecked = playerListState.filter(
       (item) => item.coins >= 900
     );
@@ -111,8 +113,6 @@ function Deck() {
             setPlayerListState(listPlayerChecked);
             setRemaining(res.remaining);
           } else {
-            console.log(remaining);
-            console.log(calcRemaining);
             setTitlePopup("Error");
             setContentPopup("Not enough cards from the deck");
             setClosePopup(false);
@@ -125,6 +125,7 @@ function Deck() {
   };
 
   const handleRevealClick = () => {
+    setDisableButton(true);
     let maxValue = 0;
     playerListState.forEach((item, index) => {
       const score = item.cards.reduce(function (total, itemS) {
@@ -147,13 +148,19 @@ function Deck() {
         maxValue = score;
         // setWinner(item);
         setContentPopup(item.name);
+        setWinner([item.name]);
         // if (score % 10 === maxValue % 10) {
         //   setWinner((pre) => ({ ...pre, item }));
         // }
       }
-      // if (score % 10 === maxValue % 10) {
-      //   setWinner((pre) => [...pre, item.name]);
-      // }
+      if (score % 10 === maxValue % 10) {
+        setWinner((pre) => [...pre, item.name]);
+        // setWinner((pre) => [
+        //   ...pre.slice(0, index),
+        //   { ...item, point: score },
+        //   ...pre.slice(index + 1),
+        // ]);
+      }
       setScoreState(maxValue);
       setCheckCard(true);
     });
@@ -175,6 +182,7 @@ function Deck() {
   };
 
   const handleShuffleClick = async () => {
+    setDisableButton(true);
     const resShuffleTheCards = await shuffleTheCards({
       params: {
         deck_count: 1,
@@ -206,12 +214,11 @@ function Deck() {
     setDeckId(resShuffleTheCards.deck_id);
     setRemaining(resShuffleTheCards.remaining);
     setFinish(false);
+    setDisableButton(true);
   };
 
   const handleClosePopup = () => {
     if (remaining !== 52) {
-      console.log("A", remaining);
-      console.log("B", calcRemaining);
       subtrac();
     } else {
       handleDrawnClick(deckId);
@@ -252,6 +259,7 @@ function Deck() {
         </div>
       ))}
       <div className="wrapper-infor-deck">
+        <div>{console.log(winner)}</div>
         <div className="deck-cards-remaining">Deck cards: {remaining}</div>
         <div>
           <Button className={`shuffle-btn`} func={handleShuffleClick}>
@@ -266,7 +274,9 @@ function Deck() {
           </Button>
           <Button
             className={`reveal-btn`}
-            disabled={playerListState[0].cards.length > 0 ? false : true}
+            disabled={
+              playerListState[0].cards.length <= 0 ? true : disableButton
+            }
             func={handleRevealClick}
           >
             Reveal
