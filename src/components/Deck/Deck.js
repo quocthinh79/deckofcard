@@ -39,7 +39,7 @@ function Deck() {
   };
   const [deckId, setDeckId] = useState();
   const [scoreState, setScoreState] = useState(0);
-  const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState([]);
   const [playerListState, setPlayerListState] = useState([
     { ...userA },
     { ...userB },
@@ -81,10 +81,14 @@ function Deck() {
     } else {
       setCheckCard(false);
       for (let j = 0; j < listPlayerChecked.length; j++) {
-        listPlayerChecked[(j + 1) % listPlayerChecked.length].cards = [];
+        if (listPlayerChecked[0].name !== "You") {
+          listPlayerChecked[j % listPlayerChecked.length].cards = [];
+        } else {
+          listPlayerChecked[(j + 1) % listPlayerChecked.length].cards = [];
+        }
       }
       // Drawn
-      for (let i = 0; i < 3; i++) {
+      loop: for (let i = 0; i < 3; i++) {
         for (let j = 0; j < listPlayerChecked.length; j++) {
           const res = await drawACard(
             {
@@ -95,18 +99,27 @@ function Deck() {
             deckId
           );
           if (res.remaining >= calcRemaining) {
-            listPlayerChecked[(j + 1) % listPlayerChecked.length].cards.push(
-              res.cards[0]
-            );
+            if (listPlayerChecked[0].name !== "You") {
+              listPlayerChecked[j % listPlayerChecked.length].cards.push(
+                res.cards[0]
+              );
+            } else {
+              listPlayerChecked[(j + 1) % listPlayerChecked.length].cards.push(
+                res.cards[0]
+              );
+            }
+            setPlayerListState(listPlayerChecked);
             setRemaining(res.remaining);
           } else {
+            console.log(remaining);
+            console.log(calcRemaining);
             setTitlePopup("Error");
             setContentPopup("Not enough cards from the deck");
             setClosePopup(false);
-            break;
+            handleShuffleClick();
+            break loop;
           }
         }
-        setPlayerListState(listPlayerChecked);
       }
     }
   };
@@ -132,12 +145,15 @@ function Deck() {
       ]);
       if (score % 10 > maxValue % 10) {
         maxValue = score;
-        setWinner(item);
+        // setWinner(item);
         setContentPopup(item.name);
-        if (score % 10 === maxValue % 10) {
-          setWinner((pre) => ({ ...pre, item }));
-        }
+        // if (score % 10 === maxValue % 10) {
+        //   setWinner((pre) => ({ ...pre, item }));
+        // }
       }
+      // if (score % 10 === maxValue % 10) {
+      //   setWinner((pre) => [...pre, item.name]);
+      // }
       setScoreState(maxValue);
       setCheckCard(true);
     });
@@ -193,9 +209,12 @@ function Deck() {
   };
 
   const handleClosePopup = () => {
-    subtrac();
-    if (remaining <= calcRemaining) {
-      handleShuffleClick();
+    if (remaining !== 52) {
+      console.log("A", remaining);
+      console.log("B", calcRemaining);
+      subtrac();
+    } else {
+      handleDrawnClick(deckId);
     }
     setClosePopup(true);
   };
