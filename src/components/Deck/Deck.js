@@ -9,6 +9,7 @@ import Button from "../Button";
 const cx = classNames.bind(styles);
 
 function Deck() {
+  // Các user hiện có
   const userA = {
     id: 0,
     name: "You",
@@ -37,26 +38,27 @@ function Deck() {
     cards: [],
     point: 0,
   };
-  const [deckId, setDeckId] = useState();
-  const [scoreState, setScoreState] = useState(0);
-  const [winner, setWinner] = useState([]);
+  const [deckId, setDeckId] = useState(); // ID của bộ bài
+  const [scoreState, setScoreState] = useState(0); // Điểm cao nhất của bán bài
+  const [winner, setWinner] = useState([]); // Danh sách người chiến thắng
   const [playerListState, setPlayerListState] = useState([
     { ...userA },
     { ...userB },
     { ...userC },
     { ...userD },
-  ]);
-  const [checkCard, setCheckCard] = useState(false);
-  const [closePopup, setClosePopup] = useState(true);
-  const [titlePopup, setTitlePopup] = useState("");
-  const [contentPopup, setContentPopup] = useState("");
-  const [remaining, setRemaining] = useState(52);
-  const [finish, setFinish] = useState(false);
+  ]); // Danh sách các người chơi
+  const [checkCard, setCheckCard] = useState(false); // Kiểm bài
+  const [closePopup, setClosePopup] = useState(true); // Đóng popup
+  const [titlePopup, setTitlePopup] = useState(""); // Title popup
+  const [contentPopup, setContentPopup] = useState(""); // Content popup
+  const [remaining, setRemaining] = useState(52); // Số lá bài còn lại
+  const [finish, setFinish] = useState(false); // Kiểm tra xuất hiện người chiến thắng cuối cùng
   const [calcRemaining, setCalcRemaining] = useState(
     52 % (playerListState.length * 3)
-  );
-  const [disableButton, setDisableButton] = useState(false);
+  ); // Số dư khi thực hiện chia bài
+  const [disableButton, setDisableButton] = useState(false); // Disable button
 
+  // Thực hiện call api ngay khi vừa render (Phòng trường hợp vừa bắt đầu người chơi đã chọn xáo bài)
   useEffect(() => {
     const callApi = async () => {
       const resShuffleTheCards = await shuffleTheCards({
@@ -69,13 +71,16 @@ function Deck() {
     callApi();
   }, []);
 
+  // Thực hiện xáo bài
   const handleDrawnClick = async (deckId) => {
-    // setWinner([]);
-    setDisableButton(false);
+    setDisableButton(false); // Hủy disable button kiểm bài khi xáo bài
+    // Lọc ra các user có số coins nhỏ hơn 900
     const listPlayerChecked = playerListState.filter(
       (item) => item.coins >= 900
     );
+    // Tính toán lại số dư khi chia bài cho người chơi
     setCalcRemaining(52 % (listPlayerChecked.length * 3));
+    // Khi người dùng yêu cầu xáo bài mà trong bàn chỉ còn 1 người chơi có đủ coins
     if (listPlayerChecked.length <= 1) {
       setTitlePopup("Winner");
       setContentPopup(listPlayerChecked[0].name);
@@ -83,6 +88,7 @@ function Deck() {
       setFinish(true);
     } else {
       setCheckCard(false);
+      // Reset các lá bài trong tay người chơi
       for (let j = 0; j < listPlayerChecked.length; j++) {
         if (listPlayerChecked[0].name !== "You") {
           listPlayerChecked[j % listPlayerChecked.length].cards = [];
@@ -102,6 +108,7 @@ function Deck() {
             deckId
           );
           if (res.remaining >= calcRemaining) {
+            // Push lá bài 
             if (listPlayerChecked[0].name !== "You") {
               listPlayerChecked[j % listPlayerChecked.length].cards.push(
                 res.cards[0]
@@ -125,11 +132,13 @@ function Deck() {
     }
   };
 
+  // Xử lý kiểm bài
   const handleRevealClick = () => {
     setDisableButton(true);
     setWinner([]);
     let maxValue = 0;
     playerListState.forEach((item, index) => {
+      // Tính tổng điểm của mỗi người chơi
       const score = item.cards.reduce(function (total, itemS) {
         let sum;
         if (Number.isNaN(parseInt(itemS.value)) && itemS.value === "ACE") {
@@ -141,6 +150,7 @@ function Deck() {
         }
         return sum;
       }, 0);
+      // Update lại điểm cho người chơi
       setPlayerListState((pre) => [
         ...pre.slice(0, index),
         { ...item, point: score },
@@ -151,6 +161,7 @@ function Deck() {
         setWinner([item.name]);
       }
       if (score % 10 === maxValue % 10) {
+        // Update và thêm người chiến thắng
         setWinner((pre) =>
           !pre.includes(item.name) ? [...pre, item.name] : [item.name]
         );
@@ -166,6 +177,7 @@ function Deck() {
     finish ? setClosePopup(false) : (winner.length > 0 ? setClosePopup(false) : setClosePopup(true))
   }, [winner]);
 
+  // Tính toán trừ coins của người thua
   const subtrac = () => {
     !finish &&
       playerListState.map((item, index) => {
@@ -179,6 +191,7 @@ function Deck() {
       });
   };
 
+  // Xử lý xáo bài
   const handleShuffleClick = async () => {
     setDisableButton(true);
     const resShuffleTheCards = await shuffleTheCards({
@@ -197,6 +210,7 @@ function Deck() {
     });
   };
 
+  // Xử lý reset
   const handleResetClick = async () => {
     setPlayerListState([
       { ...userA },
@@ -215,6 +229,7 @@ function Deck() {
     setDisableButton(true);
   };
 
+  // Đóng popup
   const handleClosePopup = () => {
     if (remaining !== 52) {
       subtrac();
