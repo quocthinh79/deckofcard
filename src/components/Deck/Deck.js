@@ -70,7 +70,7 @@ function Deck() {
   }, []);
 
   const handleDrawnClick = async (deckId) => {
-    setWinner([]);
+    // setWinner([]);
     setDisableButton(false);
     const listPlayerChecked = playerListState.filter(
       (item) => item.coins >= 900
@@ -163,7 +163,7 @@ function Deck() {
   useEffect(() => {
     setTitlePopup("Winner");
     setContentPopup(winner.toString());
-    winner.length > 0 ? setClosePopup(false) : setClosePopup(true);
+    finish ? setClosePopup(false) : (winner.length > 0 ? setClosePopup(false) : setClosePopup(true))
   }, [winner]);
 
   const subtrac = () => {
